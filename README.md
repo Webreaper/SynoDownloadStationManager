@@ -11,7 +11,7 @@ contain any of the keywords specified in the configuration file.
 
 ### Settings Storage
 
-The service reads the various settings (ES info, WirelessTag username/password) from a json file. Example Json settings:
+The app reads the settings from a json file. Example Json settings:
 ```
 {
   "logLocation": "./dscleanup.log",
