@@ -1,0 +1,6 @@
+
+.vs/SynoDSManager/xs/UserPrefs.xml
+.vs/*
+SynoDSManager/bin/*
+SynoDSManager/obj/*
+*.user

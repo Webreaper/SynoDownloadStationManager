@@ -34,6 +34,8 @@ namespace SynoDSManager
         public string url { get; set; }
         [DataMember]
         public string[] trackersToKeep { get; set; }
+		[DataMember]
+        public int maxDaysToKeep { get; set; }
     }
 
     [DataContract]

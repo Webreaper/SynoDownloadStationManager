@@ -9,7 +9,7 @@ namespace SynoDSManager
 {
     class MainClass
     {
-        protected static bool isDeletable(SynoTask task, IList<string> trackersToKeep )
+		protected static bool isDeletable(SynoTask task, SynologySettings settings )
         {
             bool canDelete = false;
 
@@ -17,8 +17,14 @@ namespace SynoDSManager
             {
                 canDelete = true;
 
-                if (trackersToKeep.Any(term => task.additional.tracker.Any(tracker => tracker.url.ToLower().Contains(term))))
-                    canDelete = false;
+				if (settings.trackersToKeep.Any(term => task.additional.tracker.Any(tracker => tracker.url.ToLower().Contains(term))))
+				{
+					// If the torrent is > 90 days old, delete
+					var age = DateTime.Now - task.additional.detail.create_time;
+
+					if (age.TotalDays < settings.maxDaysToKeep)
+						canDelete = false;
+				}	
             }
 
             return canDelete;
@@ -31,8 +37,14 @@ namespace SynoDSManager
             if (string.IsNullOrEmpty(settingPath))
                 settingPath = "Settings.json";
 
-            try
-            {
+			try
+			{
+				if (!File.Exists(settingPath))
+				{
+					Utils.Log("Settings not found: {0}", settingPath);
+					return;
+				}
+
                 string json = File.ReadAllText(settingPath);
 
                 var settings = Utils.deserializeJSON<Settings>(json);
@@ -48,8 +60,12 @@ namespace SynoDSManager
                     Utils.Log("Getting Task list...");
                     var tasks = service.GetTasks().OrderBy(x => x.title);
 
-                    var tasksToDelete = tasks.Where(x => isDeletable(x, settings.synology.trackersToKeep));
-                    var tasksToKeep = tasks.Except(tasksToDelete);
+					var tasksToDelete = tasks.Where(x => isDeletable(x, settings.synology))
+					                         .OrderBy(x => x.additional.detail.create_time)
+					                         .ToList();
+					var tasksToKeep = tasks.Except(tasksToDelete)
+					                       .OrderBy(x => x.additional.detail.create_time)
+					                       .ToList();
 
                     if (tasksToKeep.Any())
                     {

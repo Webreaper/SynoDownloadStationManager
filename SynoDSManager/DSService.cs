@@ -1,10 +1,10 @@
 ﻿using System;
+using System.Linq;
+using System.Collections.Generic;
+using RestSharp;
 
 namespace SynoDSManager
 {
-    using System;
-    using System.Collections.Generic;
-    using RestSharp;
 
     namespace SynologyService
     {
@@ -62,7 +62,14 @@ namespace SynoDSManager
                 public string status { get; set; }  
                 public string type { get; set; }  
                 public SynoAdditional additional { get; set; }
-            }
+
+				public override string ToString()
+				{
+					var tracker = additional.tracker != null ? additional.tracker.FirstOrDefault().url : "[none]";
+					return string.Format("{0:dd-MMM-yyyy}: {1} [{2}]", additional.detail.create_time, title, 
+					                     tracker);
+				}
+			}
 
             public class SynoDelete
             {
